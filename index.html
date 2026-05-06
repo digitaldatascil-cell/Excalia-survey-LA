@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Excalia Max® Survey</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --gd:#1a5c2a;--gm:#2d8a45;--gl:#e8f5ec;
+  --am:#d4820a;--al:#fdf3e0;
+  --w:#fff;--g0:#f8f9fa;--g1:#f1f3f0;--g2:#e2e6e0;--g4:#94a190;--g6:#4a5548;--g8:#1e2820;
+  --rd:#c0392b;--rl:#fdecea;--bl:#1a56a0;--bll:#e8f0fb;
+  --rs:6px;--rm:10px;--rl2:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(--g8);min-height:100vh;padding-bottom:48px}
+
+.header-banner{width:100%;max-height:190px;object-fit:cover;object-position:center top;display:block}
+.header-fallback{background:linear-gradient(135deg,#1a5c2a,#2d8a45,#4a9e62);padding:22px 20px;text-align:center;color:#fff;display:none}
+.header-fallback h1{font-size:22px;font-weight:700}
+.header-fallback p{font-size:13px;opacity:.85;margin-top:4px}
+
+.app{max-width:520px;margin:0 auto;padding:0 12px}
+
+/* PROGRESS */
+.prog-wrap{background:var(--w);padding:12px 20px;border-bottom:1px solid var(--g2);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.prog-steps{display:flex;align-items:center;justify-content:center}
+.sdot{width:26px;height:26px;border-radius:50%;background:var(--g2);color:var(--g6);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s}
+.sdot.a{background:var(--gm);color:#fff}
+.sdot.d{background:var(--gd);color:#fff}
+.sline{flex:1;height:2px;background:var(--g2);max-width:36px;transition:background .3s}
+.sline.d{background:var(--gd)}
+.slabels{display:flex;justify-content:space-between;margin-top:5px;padding:0 4px}
+.slabel{font-size:9px;color:var(--g4);text-align:center;flex:1;line-height:1.2}
+.slabel.a{color:var(--gm);font-weight:700}
+.slabel.d{color:var(--gd)}
+
+/* CARDS */
+.card{background:var(--w);border-radius:var(--rl2);padding:18px;margin-top:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid var(--g2)}
+.ctitle{font-size:15px;font-weight:700;color:var(--gd);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.cicon{width:26px;height:26px;background:var(--gl);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+/* SURVEY TYPE */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.type-card{border:2px solid var(--g2);border-radius:var(--rm);padding:18px 10px;text-align:center;cursor:pointer;transition:all .2s;background:var(--g0)}
+.type-card:hover{border-color:var(--gm);background:var(--gl)}
+.type-card.sel{border-color:var(--gd);background:var(--gl)}
+.type-card .em{font-size:30px;display:block;margin-bottom:8px}
+.type-card .tl{font-size:14px;font-weight:600;color:var(--g8)}
+.type-card .td{font-size:11px;color:var(--g6);margin-top:3px}
+.type-card.sel .tl{color:var(--gd)}
+
+/* FORM */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:12px;font-weight:600;color:var(--g6);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.fl .req{color:var(--rd);margin-left:2px}
+.fi,.fs{width:100%;padding:10px 13px;border:1.5px solid var(--g2);border-radius:var(--rs);font-size:14px;color:var(--g8);background:var(--w);transition:border-color .2s;appearance:none;-webkit-appearance:none;font-family:inherit}
+.fi:focus,.fs:focus{outline:none;border-color:var(--gm);box-shadow:0 0 0 3px rgba(45,138,69,.1)}
+.fi[readonly]{background:var(--g0);color:var(--g6);border-color:var(--g2)}
+.sw{position:relative}
+.sw::after{content:'▾';position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--g4);pointer-events:none;font-size:12px}
+.fta{width:100%;padding:10px 13px;border:1.5px solid var(--g2);border-radius:var(--rs);font-size:14px;color:var(--g8);background:var(--w);min-height:80px;resize:vertical;font-family:inherit;transition:border-color .2s}
+.fta:focus{outline:none;border-color:var(--gm);box-shadow:0 0 0 3px rgba(45,138,69,.1)}
+
+/* SEARCHABLE DROPDOWN */
+.sdd{position:relative}
+.siw{position:relative}
+.siw input{width:100%;padding:10px 34px 10px 13px;border:1.5px solid var(--g2);border-radius:var(--rs);font-size:14px;color:var(--g8);background:var(--w);transition:border-color .2s;font-family:inherit}
+.siw input:focus{outline:none;border-color:var(--gm);box-shadow:0 0 0 3px rgba(45,138,69,.1)}
+.siw .si{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--g4);font-size:13px;pointer-events:none}
+.ddl{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--w);border:1.5px solid var(--gm);border-radius:var(--rs);max-height:240px;overflow-y:auto;z-index:300;box-shadow:0 4px 16px rgba(0,0,0,.12);display:none}
+.ddl.open{display:block}
+.ddi{padding:10px 13px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--g1);transition:background .15s}
+.ddi:hover{background:var(--gl)}
+.ddi:last-child{border-bottom:none}
+.ddi.sub{opacity:.4;pointer-events:none;text-decoration:line-through}
+.ddi .dn{font-weight:600;color:var(--g8)}
+.ddi .dm{font-size:11px;color:var(--g4)}
+.ddi.addnew{background:var(--al);border-top:2px dashed var(--am)}
+.ddi.addnew .dn{color:var(--am);font-weight:700}
+.ddi.addnew:hover{background:#fde8b8}
+.ddempty{padding:14px;text-align:center;font-size:13px;color:var(--g4)}
+
+.ar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sh{background:var(--gd);color:#fff;padding:9px 14px;border-radius:var(--rs);font-size:12px;font-weight:700;margin-bottom:12px;margin-top:18px;letter-spacing:.5px;text-transform:uppercase}
+
+/* NEW RECORD BOX */
+.nrbox{background:var(--al);border:2px solid var(--am);border-radius:var(--rm);padding:14px;margin-top:10px}
+.nrtitle{font-size:13px;font-weight:700;color:var(--am);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* RADIO / CHECKBOX */
+.rg,.cg{display:flex;flex-direction:column;gap:7px}
+.ri,.ci{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border:1.5px solid var(--g2);border-radius:var(--rs);cursor:pointer;transition:all .15s}
+.ri:hover,.ci:hover{border-color:var(--gm);background:var(--gl)}
+.ri input,.ci input{width:15px;height:15px;margin-top:2px;accent-color:var(--gd);flex-shrink:0}
+.ri.ck,.ci.ck{border-color:var(--gd);background:var(--gl)}
+.ri label,.ci label{font-size:13px;color:var(--g8);cursor:pointer;line-height:1.4}
+
+/* RATING */
+.rsc{display:flex;gap:5px;flex-wrap:wrap}
+.rb{width:36px;height:36px;border:1.5px solid var(--g2);border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;background:var(--g0);color:var(--g6);transition:all .15s;display:flex;align-items:center;justify-content:center}
+.rb:hover{border-color:var(--gm);background:var(--gl)}
+.rb.sel{border-color:var(--gd);background:var(--gd);color:#fff}
+.rlabels{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--g4)}
+
+.cond{display:none;margin-top:9px;padding:11px;background:var(--al);border-radius:var(--rs);border-left:3px solid var(--am)}
+.cond.vis{display:block}
+
+/* BUTTONS */
+.btn{padding:12px 24px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:7px}
+.bp{background:var(--gd);color:#fff;width:100%;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.bp:hover{background:var(--gm)}
+.bp:active{transform:scale(.98)}
+.bs{background:var(--w);color:var(--g6);border:1.5px solid var(--g2)}
+.bs:hover{background:var(--g0);border-color:var(--g4)}
+.ba{background:var(--am);color:#fff;border:none;border-radius:var(--rs);font-size:13px;font-weight:600;padding:9px 16px;cursor:pointer;transition:background .2s}
+.ba:hover{background:#b86d08}
+.bdr{background:var(--rd);color:#fff;font-size:13px;padding:9px 14px;border-radius:var(--rs);border:none;cursor:pointer;font-weight:600}
+.bdr:hover{background:#a93226}
+.brow{display:flex;gap:9px;margin-top:18px}
+.brow .bs{flex-shrink:0}
+.brow .bp{flex:1}
+
+/* ALERTS */
+.al2{padding:11px 14px;border-radius:var(--rs);font-size:13px;margin-top:10px;display:flex;align-items:flex-start;gap:7px}
+.ae{background:var(--rl);color:var(--rd);border:1px solid #f5c6c3}
+.as{background:var(--gl);color:var(--gd);border:1px solid #b5d9c0}
+.ai{background:var(--bll);color:var(--bl);border:1px solid #b8d0f0}
+.aw{background:var(--al);color:var(--am);border:1px solid #f0d090}
+
+/* UPLOAD */
+.uz{border:2px dashed var(--g2);border-radius:var(--rm);padding:22px;text-align:center;cursor:pointer;transition:all .2s;background:var(--g0)}
+.uz:hover{border-color:var(--gm);background:var(--gl)}
+.uz .ui{font-size:30px;margin-bottom:7px}
+.uz p{font-size:14px;color:var(--g6)}
+.uz small{font-size:11px;color:var(--g4)}
+.uz input{display:none}
+
+/* SUCCESS */
+.succ{text-align:center;padding:36px 20px}
+.succ-icon{width:68px;height:68px;background:var(--gl);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:30px}
+.succ h2{font-size:21px;color:var(--gd);margin-bottom:7px}
+.succ p{font-size:14px;color:var(--g6);line-height:1.6}
+.sid{background:var(--g1);border-radius:var(--rs);padding:9px 14px;font-size:12px;font-family:monospace;color:var(--g6);margin:14px 0;display:inline-block}
+.syncst{font-size:12px;padding:7px 13px;border-radius:20px;display:inline-block;margin-top:6px}
+.synck{background:var(--gl);color:var(--gd)}
+.syncf{background:var(--rl);color:var(--rd)}
+
+/* TABS */
+.tabs{display:flex;background:var(--w);border-radius:var(--rm);padding:4px;margin-top:14px;border:1px solid var(--g2);gap:3px}
+.tb{flex:1;padding:8px 5px;border:none;background:none;border-radius:7px;font-size:11px;font-weight:600;color:var(--g4);cursor:pointer;transition:all .2s;text-align:center}
+.tb.a{background:var(--gd);color:#fff}
+
+/* ADMIN TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;display:block;overflow-x:auto}
+.tbl th{background:var(--gd);color:#fff;padding:7px 9px;text-align:left;white-space:nowrap}
+.tbl td{padding:7px 9px;border-bottom:1px solid var(--g1);white-space:nowrap}
+.tbl tr:hover td{background:var(--gl)}
+.bdg{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.bf{background:var(--gl);color:var(--gd)}
+.bd{background:var(--al);color:var(--am)}
+.bn{background:#fff3cd;color:#856404;font-size:9px;margin-left:3px}
+
+/* WEBHOOK BOX */
+.whbox{background:var(--bll);border:1.5px solid #b8d0f0;border-radius:var(--rm);padding:14px;margin-top:10px}
+.whbox label{font-size:11px;font-weight:700;color:var(--bl);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px}
+.whbox input{width:100%;padding:8px 11px;border:1.5px solid #b8d0f0;border-radius:var(--rs);font-size:12px;color:var(--g8);background:#fff;font-family:monospace}
+.whbox input:focus{outline:none;border-color:var(--bl)}
+.whst{font-size:11px;margin-top:5px;min-height:16px}
+
+/* LOCK */
+.lko{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.lkb{background:#fff;border-radius:var(--rl2);padding:30px 26px;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.lkb .li{font-size:42px;margin-bottom:12px}
+.lkb h2{font-size:19px;color:var(--gd);margin-bottom:5px}
+.lkb p{font-size:13px;color:var(--g6);margin-bottom:18px;line-height:1.5}
+.lkb input{width:100%;padding:11px 13px;border:1.5px solid var(--g2);border-radius:var(--rs);font-size:15px;text-align:center;letter-spacing:4px;margin-bottom:7px;font-family:inherit}
+.lkb input:focus{outline:none;border-color:var(--gm)}
+.lker{font-size:12px;color:var(--rd);min-height:16px;margin-bottom:8px}
+.lkcancel{margin-top:9px;background:none;border:none;font-size:13px;color:var(--g4);cursor:pointer;display:block;width:100%;padding:5px}
+
+.hidden{display:none!important}
+.rnote{font-size:11px;color:var(--g4);margin-bottom:14px;margin-top:-6px}
+.dsi{background:var(--bll);border:1px solid #b8d0f0;border-radius:var(--rs);padding:9px 13px;font-size:12px;color:var(--bl);margin-top:9px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.fcb{background:var(--gd);color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600}
+.srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.lbtn{font-size:11px;padding:5px 10px;border:1px solid var(--g2);border-radius:var(--rs);background:var(--g0);cursor:pointer;color:var(--g6);white-space:nowrap}
+@media(max-width:400px){.ar{grid-template-columns:1fr}.type-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <img class="header-banner"
+    src="https://drive.google.com/uc?export=view&id=1-0ZqozFxUgTL6wH_R3KFuPc--cG4djZh"
+    alt="Excalia Max"
+    onerror="this.style.display='none';document.getElementById('hfb').style.display='block'">
+  <div id="hfb" class="header-fallback">
+    <h1>Excalia Max®</h1><p>Powered by Indiflin™ | Field Survey System</p>
+  </div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-steps">
+    <div class="sdot a" id="d1">1</div><div class="sline" id="l1"></div>
+    <div class="sdot" id="d2">2</div><div class="sline" id="l2"></div>
+    <div class="sdot" id="d3">3</div><div class="sline" id="l3"></div>
+    <div class="sdot" id="d4">4</div><div class="sline" id="l4"></div>
+    <div class="sdot" id="d5">5</div>
+  </div>
+  <div class="slabels">
+    <span class="slabel a" id="lb1">Type</span>
+    <span class="slabel" id="lb2">Location</span>
+    <span class="slabel" id="lb3">Select</span>
+    <span class="slabel" id="lb4">Survey</span>
+    <span class="slabel" id="lb5">Done</span>
+  </div>
+</div>
+
+<div class="app">
+  <div class="tabs">
+    <button class="tb a" id="tbS" onclick="showTab('S',this)">📋 Survey</button>
+    <button class="tb"   id="tbA" onclick="reqAdmin('A',this)">📊 Admin</button>
+    <button class="tb"   id="tbU" onclick="reqAdmin('U',this)">⬆️ Upload</button>
+  </div>
+
+  <!-- ══════════════ SURVEY TAB ══════════════ -->
+  <div id="tab-S">
+
+    <!-- STEP 1 -->
+    <div id="s1" class="card">
+      <div class="ctitle"><span class="cicon">📝</span>Select Survey Type</div>
+      <div class="type-grid">
+        <div class="type-card" id="cf" onclick="setSurveyType('farmer')">
+          <span class="em">🌾</span><div class="tl">Farmer Survey</div><div class="td">Field crop assessment</div>
+        </div>
+        <div class="type-card" id="cd" onclick="setSurveyType('dealer')">
+          <span class="em">🏪</span><div class="tl">Dealer Survey</div><div class="td">Distribution feedback</div>
+        </div>
+      </div>
+      <div id="e1" class="al2 ae hidden">⚠️ Please select a survey type.</div>
+      <button class="btn bp" style="margin-top:14px" onclick="goStep(2)">Continue →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="s2" class="card hidden">
+      <div class="ctitle"><span class="cicon">📍</span>Select Location</div>
+      <p class="rnote">* Dropdowns load from your uploaded master data</p>
+      <div class="fg">
+        <label class="fl">State <span class="req">*</span></label>
+        <div class="sw"><select class="fs" id="selState"><option value="">-- Select State --</option></select></div>
+      </div>
+      <div class="fg">
+        <label class="fl">Region <span class="req">*</span></label>
+        <div class="sw"><select class="fs" id="selRegion"><option value="">-- Select Region --</option></select></div>
+      </div>
+      <div class="fg">
+        <label class="fl">Territory <span class="req">*</span></label>
+        <div class="sw"><select class="fs" id="selTerritory" onchange="onTerr()"><option value="">-- Select Territory --</option></select></div>
+        <div id="terrCount" class="dsi hidden">ℹ️ <span id="terrN"></span> records in this territory</div>
+      </div>
+      <div id="e2" class="al2 ae hidden">⚠️ Please select State, Region and Territory.</div>
+      <div class="brow">
+        <button class="btn bs" onclick="goStep(1)">← Back</button>
+        <button class="btn bp" onclick="goStep(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="s3" class="card hidden">
+      <div class="ctitle"><span class="cicon">👤</span><span id="s3title">Select Farmer</span></div>
+      <div class="fg">
+        <label class="fl">Search &amp; Select <span class="req">*</span></label>
+        <div class="sdd">
+          <div class="siw">
+            <input type="text" id="fsearch" placeholder="Type name or mobile…"
+              autocomplete="off" oninput="filterDD()" onfocus="openDD()" onblur="closeDelayed()">
+            <span class="si">🔍</span>
+          </div>
+          <div class="ddl" id="ddlist"></div>
+        </div>
+        <div id="selbadge" class="al2 as hidden"></div>
+      </div>
+
+      <!-- NEW RECORD FORM -->
+      <div id="nrform" class="nrbox hidden">
+        <div class="nrtitle">➕ Add New <span id="nrlabel">Farmer</span></div>
+        <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input type="text" class="fi" id="nrname" placeholder="Enter full name"></div>
+        <div class="fg"><label class="fl">Mobile Number <span class="req">*</span></label><input type="tel" class="fi" id="nrmobile" placeholder="10-digit number" maxlength="10"></div>
+        <div class="fg"><label class="fl">Village / Location <span class="req">*</span></label><input type="text" class="fi" id="nrvillage" placeholder="Village or town"></div>
+        <div id="nrerr" class="al2 ae hidden" style="margin-top:0"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="ba" onclick="confirmNew()">✓ Confirm &amp; Proceed</button>
+          <button class="btn bs" style="width:auto;padding:9px 13px" onclick="cancelNew()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- AUTOFILL -->
+      <div id="afsec" class="hidden">
+        <div class="sh">Auto-filled Details</div>
+        <div class="ar">
+          <div class="fg"><label class="fl">Name</label><input type="text" class="fi" id="af_name" readonly></div>
+          <div class="fg"><label class="fl">Mobile</label><input type="text" class="fi" id="af_mobile" readonly></div>
+        </div>
+        <div class="ar">
+          <div class="fg"><label class="fl">Village / Location</label><input type="text" class="fi" id="af_village" readonly></div>
+          <div class="fg"><label class="fl">Territory</label><input type="text" class="fi" id="af_territory" readonly></div>
+        </div>
+        <div id="newnotice" class="al2 aw hidden" style="margin-top:6px">🆕 Newly added — not in master dataset</div>
+      </div>
+
+      <div id="e3" class="al2 ae hidden">⚠️ Please select or add a record.</div>
+      <div class="brow">
+        <button class="btn bs" onclick="goStep(2)">← Back</button>
+        <button class="btn bp" onclick="goStep(4)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="s4" class="card hidden">
+      <div class="ctitle"><span class="cicon">📋</span><span id="s4title">Survey Questions</span></div>
+
+      <!-- ══ FARMER QUESTIONNAIRE ══ -->
+      <div id="fq">
+        <p style="font-size:12px;color:var(--g6);margin-bottom:14px;background:var(--gl);padding:9px 12px;border-radius:var(--rs);border-left:3px solid var(--gd)">
+          Fields 1–6 are auto-filled from master data. Complete Q7 onwards.
+        </p>
+
+        <div class="sh">A. Excalia Max® Application</div>
+
+        <div class="fg">
+          <label class="fl">Q7. Have you applied Excalia Max® ? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);showCond('fq7cond',this,'Yes')"><input type="radio" name="q7_applied" value="Yes"><label>a. Yes</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('fq7cond');hideCond('fq9cond');hideCond('fq10cond');hideCond('fq11sub');hideCond('fq13cond')"><input type="radio" name="q7_applied" value="No"><label>b. No</label></label>
+          </div>
+          <!-- Q8 only shown if Yes -->
+          <div class="cond" id="fq7cond">
+            <label class="fl" style="margin-bottom:8px">Q8. Source of information for Excalia Max® <span class="req">*</span></label>
+            <div class="rg">
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q8_info_source" value="Sumitomo Representative"><label>a. Sumitomo Representative</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q8_info_source" value="Dealer"><label>b. Dealer</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q8_info_source" value="Social Media"><label>c. Social Media</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q8_info_source" value="Peer Farmer"><label>d. Peer Farmer</label></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q9. On what crop was Excalia Max® applied? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);setCropStages('farmer','rice');showCond('fq9cond',this,'')"><input type="radio" name="q9_crop" value="Rice"><label>a. Rice</label></label>
+            <label class="ri" onclick="toggleR(this);setCropStages('farmer','chilli');showCond('fq9cond',this,'')"><input type="radio" name="q9_crop" value="Chilli"><label>b. Chilli</label></label>
+            <label class="ri" onclick="toggleR(this);setCropStages('farmer','groundnut');showCond('fq9cond',this,'')"><input type="radio" name="q9_crop" value="Groundnut"><label>c. Groundnut</label></label>
+            <label class="ri" onclick="toggleR(this);setCropStages('farmer','other');showCond('fq9cond',this,'')"><input type="radio" name="q9_crop" value="Any Other"><label>d. Any Other</label></label>
+          </div>
+          <div class="cond" id="fq9cond">
+            <label class="fl" style="margin-bottom:5px">Specify crop name</label>
+            <input type="text" class="fi" name="q9_crop_other" placeholder="Enter crop name">
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q10. Disease for which Excalia Max® was applied <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);hideCond('fq10cond')"><input type="radio" name="q10_disease" value="Sheath Blight"><label>a. Sheath Blight</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('fq10cond')"><input type="radio" name="q10_disease" value="Die-Back and Fruit Rot"><label>b. Die-Back and Fruit Rot</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('fq10cond')"><input type="radio" name="q10_disease" value="Tikka Disease"><label>c. Tikka Disease</label></label>
+            <label class="ri" onclick="toggleR(this);showCond('fq10cond',this,'')"><input type="radio" name="q10_disease" value="Any Other"><label>d. Any Other</label></label>
+          </div>
+          <div class="cond" id="fq10cond">
+            <label class="fl" style="margin-bottom:5px">Specify disease name</label>
+            <input type="text" class="fi" name="q10_disease_other" placeholder="Enter disease name">
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q11. When did you apply Excalia Max® ? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);hideCond('fq11sub')"><input type="radio" name="q11_when_applied" value="Before Disease Incidence"><label>a. Before Disease Incidence</label></label>
+            <label class="ri" onclick="toggleR(this);showCond('fq11sub',this,'')"><input type="radio" name="q11_when_applied" value="After Disease Incidence"><label>b. After Disease Incidence</label></label>
+          </div>
+          <div class="cond" id="fq11sub">
+            <label class="fl" style="margin-bottom:8px">% Disease Control achieved</label>
+            <div class="rg">
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="25%"><label>a. 25%</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="50%"><label>b. 50%</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="75%"><label>c. 75%</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="100%"><label>d. 100%</label></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q12. How many sprays of Excalia Max® ? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q12_sprays" value="One Spray"><label>a. One Spray</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q12_sprays" value="Two Sprays"><label>b. Two Sprays</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q13. Crop stage when Excalia Max® was applied</label>
+          <div id="fq13cond">
+            <div class="rg" id="fstages">
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q13_crop_stage" value="Tillering (Rice)"><label>Rice – 1. Tillering</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q13_crop_stage" value="Booting (Rice)"><label>Rice – 2. Booting</label></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="sh">B. Benefits &amp; Results</div>
+
+        <div class="fg">
+          <label class="fl">Q14. 3 Key benefits after applying Excalia Max® (open ended)</label>
+          <textarea class="fta" name="q14_benefits" placeholder="a. Benefit 1&#10;b. Benefit 2&#10;c. Benefit 3"></textarea>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q15. Did you get increase in yield? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q15_yield_increase" value="Yes"><label>a. Yes</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q15_yield_increase" value="No"><label>b. No</label></label>
+          </div>
+        </div>
+
+        <div class="sh">C. Application Details</div>
+
+        <div class="fg">
+          <label class="fl">Q16. Dose of Excalia Max® applied <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q16_dose" value="200 ml per acre"><label>a. 200 ml per acre</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q16_dose" value="250 ml per acre (Chilli)"><label>b. 250 ml per acre (Chilli)</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q16_dose" value="1 ml per lit water"><label>c. 1 ml per lit water</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q17. Water volume applied per acre <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q17_water_volume" value="100 lit"><label>a. 100 lit</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q17_water_volume" value="150 lit"><label>b. 150 lit</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q17_water_volume" value="200 lit"><label>c. 200 lit</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q18. Sprayer type used <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q18_sprayer_type" value="Battery Sprayer"><label>a. Battery Sprayer</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q18_sprayer_type" value="Power Sprayer"><label>b. Power Sprayer</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q18_sprayer_type" value="Boom Sprayer"><label>c. Boom Sprayer</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q19. Tank mix partner sprayed with Excalia Max® (if any)</label>
+          <textarea class="fta" name="q19_tank_mix" placeholder="a. ___________&#10;b. ___________"></textarea>
+        </div>
+
+        <div class="sh">D. Overall Feedback</div>
+
+        <div class="fg">
+          <label class="fl">Q20. Satisfaction level for Excalia Max® results (1–10) <span class="req">*</span></label>
+          <div class="rsc" id="frating">
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',1)">1</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',2)">2</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',3)">3</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',4)">4</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',5)">5</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',6)">6</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',7)">7</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',8)">8</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',9)">9</button>
+            <button class="rb" type="button" onclick="setRating('frating','q20_satisfaction',10)">10</button>
+          </div>
+          <div class="rlabels"><span>1 = Very Poor</span><span>10 = Highly Satisfied</span></div>
+          <input type="hidden" name="q20_satisfaction" id="v-q20_satisfaction">
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q21. Will you re-use Excalia Max® next season? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q21_reuse" value="Yes"><label>a. Yes</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q21_reuse" value="No"><label>b. No</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q22. Will you promote Excalia Max® to other farmers? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q22_promote" value="Yes"><label>a. Yes</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q22_promote" value="No"><label>b. No</label></label>
+          </div>
+        </div>
+      </div><!-- /fq -->
+
+      <!-- ══ DEALER QUESTIONNAIRE ══ -->
+      <div id="dq" class="hidden">
+        <p style="font-size:12px;color:var(--g6);margin-bottom:14px;background:var(--gl);padding:9px 12px;border-radius:var(--rs);border-left:3px solid var(--gd)">
+          Fields 1–6 are auto-filled from master data. Complete Q7 onwards.
+        </p>
+
+        <!-- Extra field: Dealer Firm Name -->
+        <div class="fg">
+          <label class="fl">Dealer Firm Name <span class="req">*</span></label>
+          <input type="text" class="fi" name="dealer_firm" placeholder="Enter firm / shop name">
+        </div>
+
+        <div class="sh">A. Sales Information</div>
+
+        <div class="fg">
+          <label class="fl">Q7. Have you sold Excalia Max® ? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);showCond('dq7cond',this,'')"><input type="radio" name="q7_sold" value="Yes"><label>a. Yes</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('dq7cond')"><input type="radio" name="q7_sold" value="No"><label>b. No</label></label>
+          </div>
+          <div class="cond" id="dq7cond">
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl" style="margin-bottom:8px">Q8. Crop Excalia Max® was recommended on</label>
+              <div class="rg">
+                <label class="ri" onclick="toggleR(this);setCropStages('dealer','rice');hideCond('dq8other')"><input type="radio" name="q8_crop" value="Rice"><label>a. Rice</label></label>
+                <label class="ri" onclick="toggleR(this);setCropStages('dealer','chilli');hideCond('dq8other')"><input type="radio" name="q8_crop" value="Chilli"><label>b. Chilli</label></label>
+                <label class="ri" onclick="toggleR(this);setCropStages('dealer','groundnut');hideCond('dq8other')"><input type="radio" name="q8_crop" value="Groundnut"><label>c. Groundnut</label></label>
+                <label class="ri" onclick="toggleR(this);setCropStages('dealer','cumin');hideCond('dq8other')"><input type="radio" name="q8_crop" value="Cumin"><label>d. Cumin</label></label>
+                <label class="ri" onclick="toggleR(this);setCropStages('dealer','other');showCond('dq8other',this,'')"><input type="radio" name="q8_crop" value="Any Other"><label>e. Any Other</label></label>
+              </div>
+              <div class="cond" id="dq8other"><input type="text" class="fi" name="q8_crop_other" placeholder="Specify crop name" style="margin-top:6px"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q9. Disease for which Excalia Max® was recommended <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);hideCond('dq9other')"><input type="radio" name="q9_disease" value="Sheath Blight"><label>a. Sheath Blight</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('dq9other')"><input type="radio" name="q9_disease" value="Die-Back and Fruit Rot"><label>b. Die-Back and Fruit Rot</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('dq9other')"><input type="radio" name="q9_disease" value="Tikka Disease"><label>c. Tikka Disease</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('dq9other')"><input type="radio" name="q9_disease" value="Alternaria Blight"><label>d. Alternaria Blight</label></label>
+            <label class="ri" onclick="toggleR(this);showCond('dq9other',this,'')"><input type="radio" name="q9_disease" value="Any Other"><label>e. Any Other</label></label>
+          </div>
+          <div class="cond" id="dq9other"><input type="text" class="fi" name="q9_disease_other" placeholder="Specify disease" style="margin-top:6px"></div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q10. Crop stage for which Excalia Max® was recommended</label>
+          <div class="rg" id="dstages">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q10_crop_stage" value="Tillering (Rice)"><label>Rice – 1. Tillering</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q10_crop_stage" value="Booting (Rice)"><label>Rice – 2. Booting</label></label>
+          </div>
+          <div class="cond" id="dq10other" style="margin-top:8px"><input type="text" class="fi" name="q10_stage_other" placeholder="Specify stage (Any Other crop)"></div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q11. When did you recommend Excalia Max® ? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);hideCond('dq11sub')"><input type="radio" name="q11_when_recommended" value="Before Disease Incidence"><label>a. Before Disease Incidence</label></label>
+            <label class="ri" onclick="toggleR(this);showCond('dq11sub',this,'')"><input type="radio" name="q11_when_recommended" value="After Disease Incidence"><label>b. After Disease Incidence</label></label>
+          </div>
+          <div class="cond" id="dq11sub">
+            <label class="fl" style="margin-bottom:8px">% Disease Control</label>
+            <div class="rg">
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="25%"><label>a. 25%</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="50%"><label>b. 50%</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="75%"><label>c. 75%</label></label>
+              <label class="ri" onclick="toggleR(this)"><input type="radio" name="q11_pct_control" value="100%"><label>d. 100%</label></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="sh">B. Farmer Feedback &amp; Results</div>
+
+        <div class="fg">
+          <label class="fl">Q12. Farmer feedback on benefits of Excalia Max® (open ended)</label>
+          <textarea class="fta" name="q12_farmer_feedback" placeholder="1. ___________&#10;2. ___________&#10;3. ___________"></textarea>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q13. Did your farmer customer get yield benefits? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q13_yield_benefit" value="Yes"><label>a. Yes</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q13_yield_benefit" value="No"><label>b. No</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q14. How many sprays recommended? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q14_sprays" value="One Spray"><label>a. One Spray</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q14_sprays" value="Two Sprays"><label>b. Two Sprays</label></label>
+          </div>
+        </div>
+
+        <div class="sh">C. Recommendation Details</div>
+
+        <div class="fg">
+          <label class="fl">Q15. Dose recommended <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q15_dose" value="200 ml per acre"><label>a. 200 ml per acre</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q15_dose" value="250 ml per acre"><label>b. 250 ml per acre</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q15_dose" value="1 ml per lit of water"><label>c. 1 ml per lit of water</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q16. Water volume per acre by farmer for fungicides <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this);hideCond('dq16other')"><input type="radio" name="q16_water_volume" value="100 lit"><label>a. 100 lit</label></label>
+            <label class="ri" onclick="toggleR(this);hideCond('dq16other')"><input type="radio" name="q16_water_volume" value="150 lit"><label>b. 150 lit</label></label>
+            <label class="ri" onclick="toggleR(this);showCond('dq16other',this,'')"><input type="radio" name="q16_water_volume" value="Any Other"><label>c. Any Other</label></label>
+          </div>
+          <div class="cond" id="dq16other"><input type="text" class="fi" name="q16_water_other" placeholder="Specify litres" style="margin-top:6px"></div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q17. Tank mix partner recommended with Excalia Max® (if any)</label>
+          <textarea class="fta" name="q17_tank_mix" placeholder="a. ___________&#10;b. ___________"></textarea>
+        </div>
+
+        <div class="sh">D. Overall Feedback</div>
+
+        <div class="fg">
+          <label class="fl">Q18. Satisfaction level for Excalia Max® results (1–10) <span class="req">*</span></label>
+          <div class="rsc" id="drating">
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',1)">1</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',2)">2</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',3)">3</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',4)">4</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',5)">5</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',6)">6</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',7)">7</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',8)">8</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',9)">9</button>
+            <button class="rb" type="button" onclick="setRating('drating','q18_satisfaction',10)">10</button>
+          </div>
+          <div class="rlabels"><span>1 = Very Poor</span><span>10 = Highly Satisfied</span></div>
+          <input type="hidden" name="q18_satisfaction" id="v-q18_satisfaction">
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q20. One major factor to increase Excalia Max® sales <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q20_sales_factor" value="Profit Margins"><label>a. Profit Margins</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q20_sales_factor" value="Product Demand"><label>b. Product Demand</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q20_sales_factor" value="Employee Service"><label>c. Employee Service</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q20_sales_factor" value="Credit Terms"><label>d. Credit Terms</label></label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q21. Quality of Excalia Max® information shared to you (1–5) <span class="req">*</span></label>
+          <div class="rsc" id="drating2">
+            <button class="rb" type="button" onclick="setRating('drating2','q21_info_quality',1)">1</button>
+            <button class="rb" type="button" onclick="setRating('drating2','q21_info_quality',2)">2</button>
+            <button class="rb" type="button" onclick="setRating('drating2','q21_info_quality',3)">3</button>
+            <button class="rb" type="button" onclick="setRating('drating2','q21_info_quality',4)">4</button>
+            <button class="rb" type="button" onclick="setRating('drating2','q21_info_quality',5)">5</button>
+          </div>
+          <div class="rlabels"><span>1 = Poor</span><span>5 = Excellent</span></div>
+          <input type="hidden" name="q21_info_quality" id="v-q21_info_quality">
+        </div>
+
+        <div class="fg">
+          <label class="fl">Q22. Will you sell Excalia Max® next year? <span class="req">*</span></label>
+          <div class="rg">
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q22_sell_next_year" value="Yes"><label>a. Yes</label></label>
+            <label class="ri" onclick="toggleR(this)"><input type="radio" name="q22_sell_next_year" value="No"><label>b. No</label></label>
+          </div>
+        </div>
+      </div><!-- /dq -->
+
+      <div id="e4" class="al2 ae hidden">⚠️ Please fill all required fields before submitting.</div>
+      <div class="brow">
+        <button class="btn bs" onclick="goStep(3)">← Back</button>
+        <button class="btn bp" onclick="doSubmit()">✓ Submit Survey</button>
+      </div>
+    </div><!-- /s4 -->
+
+    <!-- STEP 5 -->
+    <div id="s5" class="card hidden">
+      <div class="succ">
+        <div class="succ-icon">✅</div>
+        <h2>Survey Submitted!</h2>
+        <p>Response recorded successfully.</p>
+        <div class="sid" id="refid"></div>
+        <div id="syncind"></div>
+        <p style="font-size:12px;color:var(--g4);margin-top:10px">This record is now locked and cannot be re-submitted.</p>
+        <button class="btn bp" style="margin-top:22px" onclick="startNew()">+ Start New Survey</button>
+      </div>
+    </div>
+
+  </div><!-- /tab-S -->
+
+  <!-- ══════════════ ADMIN TAB ══════════════ -->
+  <div id="tab-A" class="hidden">
+    <div class="card">
+      <div class="srow">
+        <div class="ctitle" style="margin-bottom:0"><span class="cicon">📊</span>Dashboard</div>
+        <button class="lbtn" onclick="adminOut()">🔓 Logout</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
+        <div style="background:var(--gl);border-radius:var(--rs);padding:13px;text-align:center"><div style="font-size:26px;font-weight:700;color:var(--gd)" id="stTotal">0</div><div style="font-size:11px;color:var(--gm)">Total</div></div>
+        <div style="background:var(--al);border-radius:var(--rs);padding:13px;text-align:center"><div style="font-size:26px;font-weight:700;color:var(--am)" id="stToday">0</div><div style="font-size:11px;color:var(--am)">Today</div></div>
+        <div style="background:var(--bll);border-radius:var(--rs);padding:13px;text-align:center"><div style="font-size:26px;font-weight:700;color:var(--bl)" id="stF">0</div><div style="font-size:11px;color:var(--bl)">Farmer</div></div>
+        <div style="background:#fef0f0;border-radius:var(--rs);padding:13px;text-align:center"><div style="font-size:26px;font-weight:700;color:var(--rd)" id="stD">0</div><div style="font-size:11px;color:var(--rd)">Dealer</div></div>
+      </div>
+
+      <!-- WEBHOOK INPUT -->
+      <div class="whbox">
+        <label>🔗 Google Sheets Webhook URL</label>
+        <input type="url" id="whUrl" placeholder="Paste your Apps Script Web App URL here…" oninput="saveWH()">
+        <div class="whst" id="whSt"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:14px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn bp" style="width:auto;font-size:13px;padding:9px 16px" onclick="exportCSV()">⬇ Export Full CSV</button>
+        <button class="bdr" onclick="clearAll()">🗑 Reset Submissions</button>
+      </div>
+
+      <div id="emptyA" class="empty-state" style="text-align:center;padding:28px;color:var(--g4);font-size:13px">No submissions yet.</div>
+      <div style="overflow-x:auto;display:none" id="twrap">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Ref ID</th><th>Time</th><th>Type</th><th>Name</th><th>Mobile</th><th>Territory</th><th>Village</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ UPLOAD TAB ══════════════ -->
+  <div id="tab-U" class="hidden">
+
+    <!-- FARMER UPLOAD -->
+    <div class="card">
+      <div class="srow">
+        <div class="ctitle" style="margin-bottom:0"><span class="cicon">🌾</span>Farmer Master Data</div>
+        <button class="lbtn" onclick="adminOut()">🔓 Logout</button>
+      </div>
+      <p style="font-size:13px;color:var(--g6);margin-bottom:14px;line-height:1.6">
+        Excel columns needed: <strong>Territory · Farmer Name · Mobile Number · Village · State · Region</strong><br>
+        <span style="font-size:12px;color:var(--gm)">Uploaded data is locked — field officers cannot modify it.</span>
+      </p>
+      <div class="uz" onclick="document.getElementById('fxls').click()">
+        <div class="ui">📊</div><p>Upload Farmer Excel</p><small>.xlsx or .xls</small>
+        <input type="file" id="fxls" accept=".xlsx,.xls" onchange="handleXLS(event,'farmer')">
+      </div>
+      <div id="fupSt" class="hidden" style="margin-top:9px"></div>
+      <div id="fupPrev" class="hidden" style="margin-top:10px"><div id="fupStats" class="dsi"></div></div>
+    </div>
+
+    <!-- DEALER UPLOAD -->
+    <div class="card">
+      <div class="ctitle"><span class="cicon">🏪</span>Dealer Master Data</div>
+      <p style="font-size:13px;color:var(--g6);margin-bottom:14px;line-height:1.6">
+        Excel columns needed: <strong>Territory · Dealer Name · Mobile Number · Village/Location · State · Region</strong><br>
+        <span style="font-size:12px;color:var(--am)">Dealer data is only used in Dealer Survey flow.</span>
+      </p>
+      <div class="uz" onclick="document.getElementById('dxls').click()">
+        <div class="ui">📋</div><p>Upload Dealer Excel</p><small>.xlsx or .xls</small>
+        <input type="file" id="dxls" accept=".xlsx,.xls" onchange="handleXLS(event,'dealer')">
+      </div>
+      <div id="dupSt" class="hidden" style="margin-top:9px"></div>
+      <div id="dupPrev" class="hidden" style="margin-top:10px"><div id="dupStats" class="dsi"></div></div>
+    </div>
+
+  </div>
+
+</div><!-- /app -->
+
+<!-- LOCK OVERLAY -->
+<div class="lko hidden" id="lko">
+  <div class="lkb">
+    <div class="li">🔐</div>
+    <h2>Admin Access</h2>
+    <p>This section is for administrators only. Enter the admin password to continue.</p>
+    <input type="password" id="lkpass" placeholder="••••••••" onkeydown="if(event.key==='Enter')chkPass()">
+    <div class="lker" id="lkerr"></div>
+    <button class="btn bp" onclick="chkPass()">Unlock →</button>
+    <button class="lkcancel" onclick="closeLk()">Cancel</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════ */
+const ADMIN_PW = 'Excalia@2025'; // ← Change before sharing
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let step       = 1;
+let stype      = null;   // 'farmer' | 'dealer'
+let selRec     = null;   // selected farmer/dealer object
+let isNew      = false;  // newly added on field
+let adminOK    = false;
+let pendingTab = null;
+
+// Separate master datasets — farmers only in farmer flow, dealers only in dealer flow
+let fDS = []; // farmer dataset
+let dDS = []; // dealer dataset
+
+let subs    = JSON.parse(localStorage.getItem('ex_subs')    || '[]');
+let subMobs = new Set(JSON.parse(localStorage.getItem('ex_mobs') || '[]'));
+let whURL   = localStorage.getItem('ex_wh') || '';
+
+/* ═══════════════════════════════════════════
+   SAMPLE DATA
+═══════════════════════════════════════════ */
+fDS = [
+  {territory:'T001-Lucknow',   farmer_name:'Ramesh Kumar',   mobile:'9876543210', village:'Sultanpur', state:'Uttar Pradesh', region:'North Zone'},
+  {territory:'T001-Lucknow',   farmer_name:'Suresh Yadav',   mobile:'9812345678', village:'Barabanki', state:'Uttar Pradesh', region:'North Zone'},
+  {territory:'T002-Ahmedabad', farmer_name:'Rajendra Patel', mobile:'9856781234', village:'Sanand',    state:'Gujarat',       region:'West Zone'},
+  {territory:'T002-Ahmedabad', farmer_name:'Dinesh Patel',   mobile:'9867890123', village:'Ahmedabad', state:'Gujarat',       region:'West Zone'},
+  {territory:'T003-Rohtak',    farmer_name:'Anil Verma',     mobile:'9745678901', village:'Rohtak',    state:'Haryana',       region:'North Zone'},
+  {territory:'T004-Pune',      farmer_name:'Santosh Patil',  mobile:'9634567890', village:'Pune',      state:'Maharashtra',   region:'West Zone'},
+];
+dDS = [
+  {territory:'T001-Lucknow',   farmer_name:'Shyam Agro Store',  mobile:'9811112222', village:'Lucknow',   state:'Uttar Pradesh', region:'North Zone'},
+  {territory:'T001-Lucknow',   farmer_name:'Kissan Depot',       mobile:'9822223333', village:'Barabanki', state:'Uttar Pradesh', region:'North Zone'},
+  {territory:'T002-Ahmedabad', farmer_name:'Patel Agri Centre',  mobile:'9833334444', village:'Ahmedabad', state:'Gujarat',       region:'West Zone'},
+  {territory:'T003-Rohtak',    farmer_name:'Haryana Krishi Hub', mobile:'9844445555', village:'Rohtak',    state:'Haryana',       region:'North Zone'},
+];
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+window.onload = () => {
+  rebuildDDs();
+  updateStats();
+  if (whURL) { g('whUrl').value = whURL; setWhSt('✅ Webhook URL saved', 'var(--gd)'); }
+};
+
+/* ═══════════════════════════════════════════
+   ADMIN LOCK
+═══════════════════════════════════════════ */
+function reqAdmin(tab, btn) {
+  if (adminOK) { showTab(tab, btn); return; }
+  pendingTab = { tab, btn };
+  g('lkpass').value=''; g('lkerr').textContent='';
+  g('lko').classList.remove('hidden');
+  setTimeout(()=>g('lkpass').focus(), 100);
+}
+function chkPass() {
+  if (g('lkpass').value === ADMIN_PW) {
+    adminOK = true; g('lko').classList.add('hidden');
+    if (pendingTab) { showTab(pendingTab.tab, pendingTab.btn); pendingTab=null; }
+  } else {
+    g('lkerr').textContent='❌ Incorrect password'; g('lkpass').value=''; g('lkpass').focus();
+  }
+}
+function closeLk() { g('lko').classList.add('hidden'); pendingTab=null; }
+function adminOut() { adminOK=false; showTab('S', g('tbS')); }
+
+/* ═══════════════════════════════════════════
+   WEBHOOK
+═══════════════════════════════════════════ */
+function saveWH() {
+  whURL = g('whUrl').value.trim();
+  localStorage.setItem('ex_wh', whURL);
+  setWhSt(whURL ? '✅ URL saved' : '', whURL ? 'var(--gd)' : '');
+}
+function setWhSt(msg,col){ const e=g('whSt'); e.textContent=msg; e.style.color=col; }
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+function showTab(t, btn) {
+  ['S','A','U'].forEach(x=>g('tab-'+x).classList.add('hidden'));
+  g('tab-'+t).classList.remove('hidden');
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('a'));
+  (btn||g('tb'+t)).classList.add('a');
+  if (t==='A') updateStats();
+}
+
+/* ═══════════════════════════════════════════
+   STEPS
+═══════════════════════════════════════════ */
+function goStep(n) {
+  if (n > step && !validate(step)) return;
+  step = n;
+  [1,2,3,4,5].forEach(i=>g('s'+i).classList.toggle('hidden',i!==n));
+  updProg(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function validate(n) {
+  document.querySelectorAll('.al2.ae').forEach(e=>e.classList.add('hidden'));
+  if (n===1 && !stype) { sh('e1'); return false; }
+  if (n===2) {
+    if (!v('selState')||!v('selRegion')||!v('selTerritory')) { sh('e2'); return false; }
+  }
+  if (n===3 && !selRec) { sh('e3'); return false; }
+  return true;
+}
+function updProg(n) {
+  [1,2,3,4,5].forEach(i=>{
+    g('d'+i).className='sdot'+(i<n?' d':i===n?' a':'');
+    g('lb'+i).className='slabel'+(i<n?' d':i===n?' a':'');
+    if(i<5) g('l'+i).className='sline'+(i<n?' d':'');
+  });
+}
+
+/* ═══════════════════════════════════════════
+   SURVEY TYPE — key: each type uses its OWN dataset
+═══════════════════════════════════════════ */
+function setSurveyType(t) {
+  stype = t;
+  g('cf').classList.toggle('sel', t==='farmer');
+  g('cd').classList.toggle('sel', t==='dealer');
+  g('s3title').textContent   = t==='farmer' ? 'Select Farmer' : 'Select Dealer';
+  g('nrlabel').textContent   = t==='farmer' ? 'Farmer'        : 'Dealer';
+  // Rebuild dropdowns from correct dataset
+  rebuildDDs();
+}
+
+/* ═══════════════════════════════════════════
+   DROPDOWNS — filtered by survey type
+═══════════════════════════════════════════ */
+const uniq = a => [...new Set(a.filter(Boolean))].sort();
+function activeDS() { return stype==='dealer' ? dDS : fDS; }
+
+function rebuildDDs() {
+  const ds = activeDS();
+  fillSel('selState',     uniq(ds.map(r=>r.state)),     '-- Select State --');
+  fillSel('selRegion',    uniq(ds.map(r=>r.region)),    '-- Select Region --');
+  fillSel('selTerritory', uniq(ds.map(r=>r.territory)), '-- Select Territory --');
+}
+function fillSel(id, items, ph) {
+  g(id).innerHTML = `<option value="">${ph}</option>`+items.map(x=>`<option>${x}</option>`).join('');
+}
+function onTerr() {
+  const t=v('selTerritory');
+  if(!t){g('terrCount').classList.add('hidden');return;}
+  const n=activeDS().filter(r=>r.territory===t).length;
+  g('terrN').textContent=n; g('terrCount').classList.remove('hidden');
+  // reset selection
+  selRec=null; isNew=false;
+  g('fsearch').value='';
+  ['selbadge','afsec','nrform'].forEach(id=>g(id).classList.add('hidden'));
+}
+
+/* ═══════════════════════════════════════════
+   SEARCHABLE DROPDOWN
+═══════════════════════════════════════════ */
+function terrRecs() {
+  const t=v('selTerritory');
+  return t ? activeDS().filter(r=>r.territory===t) : [];
+}
+function openDD()   { renderDD(terrRecs()); g('ddlist').classList.add('open'); }
+function closeDelayed() { setTimeout(()=>g('ddlist').classList.remove('open'),250); }
+function filterDD() {
+  const q=g('fsearch').value.toLowerCase();
+  renderDD(terrRecs().filter(r=>r.farmer_name.toLowerCase().includes(q)||r.mobile.includes(q)));
+  g('ddlist').classList.add('open');
+}
+function renderDD(list) {
+  const lbl = stype==='dealer' ? 'New Dealer' : 'New Farmer';
+  let html = list.length
+    ? list.map(r=>{
+        const sub=subMobs.has(r.mobile);
+        const enc=btoa(unescape(encodeURIComponent(JSON.stringify(r))));
+        return `<div class="ddi ${sub?'sub':''}" onclick="pickRec('${enc}')">
+          <div class="dn">${r.farmer_name}${sub?' ✓ (Submitted)':''}</div>
+          <div class="dm">${r.mobile} · ${r.village}</div>
+        </div>`;
+      }).join('')
+    : '<div class="ddempty">No records for this territory</div>';
+  html += `<div class="ddi addnew" onclick="openNR()">
+    <div class="dn">➕ Add ${lbl} (not in list)</div>
+    <div class="dm">Tap to enter name, mobile &amp; village</div>
+  </div>`;
+  g('ddlist').innerHTML = html;
+}
+function pickRec(enc) {
+  const rec=JSON.parse(decodeURIComponent(escape(atob(enc))));
+  if(subMobs.has(rec.mobile)){alert('⚠️ Entry already submitted for this record. Duplicate not allowed.');return;}
+  isNew=false; applyRec(rec);
+}
+
+/* ═══════════════════════════════════════════
+   ADD NEW RECORD INLINE
+═══════════════════════════════════════════ */
+function openNR() {
+  g('ddlist').classList.remove('open'); g('fsearch').value='';
+  ['nrerr'].forEach(id=>g(id).classList.add('hidden'));
+  ['nrname','nrmobile','nrvillage'].forEach(id=>g(id).value='');
+  g('nrform').classList.remove('hidden');
+  g('afsec').classList.add('hidden');
+  g('selbadge').classList.add('hidden');
+  g('nrname').focus();
+}
+function cancelNew() { g('nrform').classList.add('hidden'); g('fsearch').value=''; selRec=null; }
+function confirmNew() {
+  const nm=g('nrname').value.trim(), mob=g('nrmobile').value.trim(), vil=g('nrvillage').value.trim();
+  const err=g('nrerr');
+  if(!nm){err.textContent='⚠️ Name required'; err.classList.remove('hidden'); return;}
+  if(!/^\d{10}$/.test(mob)){err.textContent='⚠️ Mobile must be exactly 10 digits'; err.classList.remove('hidden'); return;}
+  if(subMobs.has(mob)){err.textContent='⚠️ This mobile already has a submission'; err.classList.remove('hidden'); return;}
+  if(!vil){err.textContent='⚠️ Village/location required'; err.classList.remove('hidden'); return;}
+  isNew=true;
+  g('nrform').classList.add('hidden');
+  applyRec({farmer_name:nm, mobile:mob, village:vil, territory:v('selTerritory'), state:v('selState'), region:v('selRegion')});
+}
+function applyRec(rec) {
+  selRec=rec;
+  g('fsearch').value=rec.farmer_name+' — '+rec.mobile;
+  g('ddlist').classList.remove('open');
+  g('selbadge').innerHTML='✅ Selected: <strong>'+rec.farmer_name+'</strong> ('+rec.mobile+')';
+  g('selbadge').classList.remove('hidden');
+  g('af_name').value=rec.farmer_name;
+  g('af_mobile').value=rec.mobile;
+  g('af_village').value=rec.village||'';
+  g('af_territory').value=rec.territory;
+  g('afsec').classList.remove('hidden');
+  g('newnotice').classList.toggle('hidden',!isNew);
+  // show correct questions
+  g('fq').classList.toggle('hidden', stype!=='farmer');
+  g('dq').classList.toggle('hidden', stype!=='dealer');
+  g('s4title').textContent = stype==='farmer' ? 'Farmer Survey Questions' : 'Dealer Survey Questions';
+}
+
+/* ═══════════════════════════════════════════
+   CROP STAGE LOGIC
+═══════════════════════════════════════════ */
+const cropStages = {
+  rice:      [{v:'Tillering (Rice)',     l:'1. Tillering'},{v:'Booting (Rice)',       l:'2. Booting'}],
+  chilli:    [{v:'Flowering (Chilli)',   l:'1. Flowering'},{v:'Fruit Setting (Chilli)',l:'2. Fruit Setting'}],
+  groundnut: [{v:'Flower Initiation (Groundnut)',l:'1. Flower Initiation'},{v:'Pegging (Groundnut)',l:'2. Pegging'}],
+  cumin:     [{v:'Flowering (Cumin)',    l:'1. Flowering'},{v:'Grain Filling (Cumin)', l:'2. Grain Filling'}],
+  other:     [{v:'Other crop stage',     l:'Specify below'}],
+};
+function setCropStages(qtype, crop) {
+  const stagesEl = g(qtype==='farmer'?'fstages':'dstages');
+  const stages   = cropStages[crop] || cropStages.rice;
+  stagesEl.innerHTML = stages.map(s=>`
+    <label class="ri" onclick="toggleR(this)">
+      <input type="radio" name="${qtype==='farmer'?'q13_crop_stage':'q10_crop_stage'}" value="${s.v}">
+      <label>${s.l}</label>
+    </label>`).join('');
+  if (qtype==='dealer') {
+    g('dq10other').classList.toggle('vis', crop==='other');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   RADIO / CONDITIONAL
+═══════════════════════════════════════════ */
+function toggleR(el) {
+  const nm=el.querySelector('input').name;
+  document.querySelectorAll(`input[name="${nm}"]`).forEach(i=>i.closest('.ri').classList.remove('ck'));
+  el.classList.add('ck'); el.querySelector('input').checked=true;
+}
+function showCond(id,el,tv){ g(id).classList.add('vis'); }
+function hideCond(id){ const e=g(id); if(e) e.classList.remove('vis'); }
+
+/* ═══════════════════════════════════════════
+   RATING
+═══════════════════════════════════════════ */
+function setRating(gid, fname, val) {
+  document.querySelectorAll('#'+gid+' .rb').forEach((b,i)=>b.classList.toggle('sel',i<val));
+  const h=g('v-'+fname); if(h) h.value=val;
+}
+
+/* ═══════════════════════════════════════════
+   SUBMIT
+═══════════════════════════════════════════ */
+function doSubmit() {
+  if(!selRec){sh('e4');return;}
+  const qid = stype==='farmer'?'fq':'dq';
+  const fd={};
+  g(qid).querySelectorAll('[name]').forEach(el=>{
+    const n=el.name;
+    if(el.type==='radio'){if(el.checked)fd[n]=el.value;}
+    else if(el.type==='checkbox'){if(el.checked)fd[n]=fd[n]?fd[n]+'; '+el.value:el.value;}
+    else if(el.type==='hidden'){if(el.value)fd[n]=el.value;}
+    else{if(el.value.trim())fd[n]=el.value.trim();}
+  });
+
+  const rec={
+    ref_id:    'EXC-'+Date.now(),
+    timestamp: new Date().toLocaleString('en-IN'),
+    survey_type: stype,
+    is_new:    isNew?'New (Added on field)':'Existing (Master data)',
+    farmer_name: selRec.farmer_name,
+    mobile:      selRec.mobile,
+    village:     selRec.village||'',
+    territory:   selRec.territory,
+    state:       v('selState'),
+    region:      v('selRegion'),
+    ...fd
+  };
+
+  subs.push(rec);
+  subMobs.add(selRec.mobile);
+  localStorage.setItem('ex_subs', JSON.stringify(subs));
+  localStorage.setItem('ex_mobs', JSON.stringify([...subMobs]));
+
+  g('refid').textContent='Reference ID: '+rec.ref_id;
+  goStep(5);
+  postToSheets(rec);
+}
+
+/* ═══════════════════════════════════════════
+   GOOGLE SHEETS SYNC
+═══════════════════════════════════════════ */
+async function postToSheets(data) {
+  const url = whURL||localStorage.getItem('ex_wh')||'';
+  const ind = g('syncind');
+  if(!url){ind.innerHTML='<span class="syncst syncf">⚠️ No webhook URL set — data saved locally only</span>';return;}
+  ind.innerHTML='<span class="syncst" style="background:var(--g1);color:var(--g6)">🔄 Syncing to Google Sheets…</span>';
+  try {
+    await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    ind.innerHTML='<span class="syncst synck">✅ Synced to Google Sheets</span>';
+  } catch(e) {
+    ind.innerHTML='<span class="syncst syncf">❌ Sync failed — saved locally</span>';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   START NEW
+═══════════════════════════════════════════ */
+function startNew() {
+  stype=null; selRec=null; isNew=false;
+  ['cf','cd'].forEach(id=>g(id).classList.remove('sel'));
+  ['selState','selRegion','selTerritory'].forEach(id=>g(id).value='');
+  g('fsearch').value='';
+  ['selbadge','afsec','terrCount','nrform'].forEach(id=>g(id).classList.add('hidden'));
+  ['af_name','af_mobile','af_village','af_territory'].forEach(id=>g(id).value='');
+  document.querySelectorAll('.ri,.ci').forEach(el=>{el.classList.remove('ck');el.querySelector('input').checked=false;});
+  document.querySelectorAll('.rb').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.cond').forEach(c=>c.classList.remove('vis'));
+  document.querySelectorAll('[name]').forEach(el=>{if(el.type!=='radio'&&el.type!=='checkbox')el.value='';});
+  goStep(1);
+}
+
+/* ═══════════════════════════════════════════
+   ADMIN STATS & TABLE
+═══════════════════════════════════════════ */
+function updateStats() {
+  const today=new Date().toDateString();
+  g('stTotal').textContent=subs.length;
+  g('stToday').textContent=subs.filter(s=>{try{return new Date(s.timestamp).toDateString()===today;}catch{return false;}}).length;
+  g('stF').textContent=subs.filter(s=>s.survey_type==='farmer').length;
+  g('stD').textContent=subs.filter(s=>s.survey_type==='dealer').length;
+  const em=g('emptyA'),tw=g('twrap');
+  if(!subs.length){em.style.display='block';tw.style.display='none';return;}
+  em.style.display='none';tw.style.display='block';
+  g('tbody').innerHTML=subs.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td style="font-family:monospace;font-size:10px">${s.ref_id}</td>
+      <td>${s.timestamp}</td>
+      <td><span class="bdg ${s.survey_type==='farmer'?'bf':'bd'}">${s.survey_type==='farmer'?'🌾':'🏪'} ${s.survey_type}</span>${s.is_new&&s.is_new.includes('New')?'<span class="bdg bn">NEW</span>':''}</td>
+      <td>${s.farmer_name}</td><td>${s.mobile}</td><td>${s.territory}</td><td>${s.village||'—'}</td>
+    </tr>`).join('');
+}
+function clearAll() {
+  if(!confirm('Delete ALL submissions? Cannot be undone.'))return;
+  subs=[];subMobs=new Set();
+  localStorage.removeItem('ex_subs');localStorage.removeItem('ex_mobs');
+  updateStats();
+}
+
+/* ═══════════════════════════════════════════
+   FULL CSV EXPORT
+═══════════════════════════════════════════ */
+function exportCSV() {
+  if(!subs.length){alert('No data to export.');return;}
+  const meta=['ref_id','timestamp','survey_type','is_new','farmer_name','mobile','village','territory','state','region'];
+  const qk=new Set(); subs.forEach(s=>Object.keys(s).forEach(k=>{if(!meta.includes(k))qk.add(k);}));
+  const cols=[...meta,...qk];
+  const esc=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
+  const csv=[cols,...subs.map(s=>cols.map(k=>esc(s[k])))].map(r=>r.join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='Excalia_Max_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+/* ═══════════════════════════════════════════
+   EXCEL UPLOAD — completely separate for farmer/dealer
+═══════════════════════════════════════════ */
+function handleXLS(event, dtype) {
+  const file=event.target.files[0];if(!file)return;
+  const stId=dtype+'upSt', pvId=dtype+'upPrev', stEl=dtype+'upStats';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const raw=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!raw.length){upSt(stId,'error','❌ File is empty.');return;}
+      const parsed=raw.map(row=>{
+        const n={};
+        Object.entries(row).forEach(([k,val])=>{n[k.toLowerCase().trim().replace(/[\s_]+/g,'_')]=String(val).trim();});
+        return {
+          territory:   n['territory']    ||n['territory_name']||'',
+          farmer_name: n['farmer_name']  ||n['dealer_name']   ||n['name']||n['farmer']||n['dealer']||'',
+          mobile:      n['mobile_number']||n['mobile']        ||n['phone']||n['mobile_no']||'',
+          village:     n['village']      ||n['village_name']  ||n['location']||'',
+          state:       n['state']        ||n['state_name']    ||'',
+          region:      n['region']       ||n['region_name']   ||''
+        };
+      }).filter(r=>r.farmer_name&&r.mobile);
+
+      // Store separately — farmer data goes to fDS, dealer to dDS
+      if(dtype==='farmer') fDS=parsed; else dDS=parsed;
+
+      // Only rebuild dropdowns for active survey type
+      rebuildDDs();
+
+      const t=uniq(parsed.map(r=>r.territory)).length;
+      upSt(stId,'success',`✅ ${parsed.length} records · ${t} territories loaded from "${wb.SheetNames[0]}"`);
+      g(pvId).classList.remove('hidden');
+      g(stEl).innerHTML=`📋 <strong>${parsed.length}</strong> ${dtype} records &nbsp;<span class="fcb">${t} territories</span>`;
+    }catch(err){upSt(stId,'error','❌ Error: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function upSt(id,type,msg){
+  const el=g(id);el.className='al2 '+(type==='success'?'as':'ae');el.textContent=msg;el.classList.remove('hidden');
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+const g = id => document.getElementById(id);
+const v = id => g(id).value;
+const sh = id => g(id).classList.remove('hidden');
+</script>
+</body>
+</html>
