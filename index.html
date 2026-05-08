@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -262,11 +263,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
       <p class="rnote" id="dsNote">Loading from master data…</p>
       <div class="fg">
         <label class="fl">State <span class="req">*</span></label>
-        <div class="selw"><select class="fsel" id="selState"><option value="">-- Select State --</option></select></div>
+        <div class="selw"><select class="fsel" id="selState" onchange="onState()"><option value="">-- Select State --</option></select></div>
       </div>
       <div class="fg">
         <label class="fl">Region <span class="req">*</span></label>
-        <div class="selw"><select class="fsel" id="selRegion"><option value="">-- Select Region --</option></select></div>
+        <div class="selw"><select class="fsel" id="selRegion" onchange="onRegion()"><option value="">-- Select Region --</option></select></div>
       </div>
       <div class="fg">
         <label class="fl">Territory <span class="req">*</span></label>
@@ -542,9 +543,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
 
       <!-- DEALER QUESTIONS -->
       <div id="DQ" class="hidden">
+        <div class="sh">Dealer Details</div>
         <div class="fg">
           <label class="fl">Dealer Firm Name <span class="req">*</span></label>
           <input type="text" class="fi" name="dealer_firm" placeholder="Enter firm / shop name">
+        </div>
+        <div class="fg">
+          <label class="fl">Proprietor Name <span class="req">*</span></label>
+          <input type="text" class="fi" name="proprietor_name" placeholder="Enter proprietor name">
         </div>
 
         <div class="sh">Section A — Sales Information</div>
@@ -559,7 +565,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
 
         <div id="dRest">
           <div class="fg">
-            <label class="fl">Q2. Crop recommended <span class="req">*</span></label>
+            <label class="fl">Q2. On what crop was Excalia Max® recommended? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this);setStages('D','rice');hideCond('dCropOth')">  <input type="radio" name="q8_crop" value="Rice">     <label>a. Rice</label></label>
               <label class="ri" onclick="pickR(this);setStages('D','chilli');hideCond('dCropOth')"><input type="radio" name="q8_crop" value="Chilli">   <label>b. Chilli</label></label>
@@ -574,7 +580,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q3. Disease recommended for <span class="req">*</span></label>
+            <label class="fl">Q3. What disease was Excalia Max® recommended for? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this);hideCond('dDisOth')"><input type="radio" name="q9_disease" value="Sheath Blight">        <label>a. Sheath Blight</label></label>
               <label class="ri" onclick="pickR(this);hideCond('dDisOth')"><input type="radio" name="q9_disease" value="Die-Back and Fruit Rot"><label>b. Die-Back and Fruit Rot</label></label>
@@ -589,7 +595,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q4. Crop stage when recommended</label>
+            <label class="fl">Q4. What was the crop stage when Excalia Max® was recommended?</label>
             <div class="rg" id="Dstages">
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q10_crop_stage" value="Tillering (Rice)"><label>Rice — 1. Tillering</label></label>
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q10_crop_stage" value="Booting (Rice)">  <label>Rice — 2. Booting</label></label>
@@ -604,7 +610,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
               <label class="ri" onclick="pickR(this);showCond('dWhenSub')"><input type="radio" name="q11_when_recommended" value="After Disease Incidence"> <label>b. After Disease Incidence</label></label>
             </div>
             <div class="cond" id="dWhenSub">
-              <label class="fl" style="margin-bottom:7px">% Disease Control</label>
+              <label class="fl" style="margin-bottom:7px">% Disease Control achieved</label>
               <div class="rg">
                 <label class="ri" onclick="pickR(this)"><input type="radio" name="q11_pct_control" value="25%"> <label>a. 25%</label></label>
                 <label class="ri" onclick="pickR(this)"><input type="radio" name="q11_pct_control" value="50%"> <label>b. 50%</label></label>
@@ -617,12 +623,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           <div class="sh">Section B — Farmer Feedback</div>
 
           <div class="fg">
-            <label class="fl">Q6. Farmer feedback on benefits</label>
-            <textarea class="fta" name="q12_farmer_feedback" placeholder="1. ___________&#10;2. ___________&#10;3. ___________"></textarea>
+            <label class="fl">Q7. What feedback did your farmer give for benefits of Excalia Max® ? (select all that apply)</label>
+            <div class="cg" id="dBenefitsCG">
+              <label class="ci" onclick="pickC2(this)">
+                <input type="checkbox" name="q12_farmer_feedback" value="Strong Tillers - मजबूत कल्ले">
+                <label><strong>i. Strong Tillers</strong><span class="hn">मजबूत कल्ले</span></label>
+              </label>
+              <label class="ci" onclick="pickC2(this)">
+                <input type="checkbox" name="q12_farmer_feedback" value="Excellent Phyto-tonic Effect - बेहतरीन फाइटोटोनिक प्रभाव">
+                <label><strong>ii. Excellent Phyto-tonic Effect</strong><span class="hn">बेहतरीन फाइटोटोनिक प्रभाव</span></label>
+              </label>
+              <label class="ci" onclick="pickC2(this)">
+                <input type="checkbox" name="q12_farmer_feedback" value="Control of Sheath Blight - शीथ ब्लाइट का प्रभावी नियंत्रण">
+                <label><strong>iii. Control of Sheath Blight</strong><span class="hn">शीथ ब्लाइट का प्रभावी नियंत्रण</span></label>
+              </label>
+              <label class="ci" onclick="pickC2(this)">
+                <input type="checkbox" name="q12_farmer_feedback" value="Grain Shining &amp; Quality - उत्तम और चमकदार धान">
+                <label><strong>iv. Grain Shining &amp; Quality</strong><span class="hn">उत्तम और चमकदार धान</span></label>
+              </label>
+              <label class="ci" onclick="pickC2(this)">
+                <input type="checkbox" name="q12_farmer_feedback" value="None of the Above - ऊपर दिए गए में से कोई भी नहीं">
+                <label><strong>v. None of the Above</strong><span class="hn">ऊपर दिए गए में से कोई भी नहीं</span></label>
+              </label>
+            </div>
           </div>
 
           <div class="fg">
-            <label class="fl">Q7. Did farmer get yield benefits? <span class="req">*</span></label>
+            <label class="fl">Q8. Did your farmer customer get any yield benefits? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q13_yield_benefit" value="Yes"><label>a. Yes</label></label>
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q13_yield_benefit" value="No"> <label>b. No</label></label>
@@ -630,7 +657,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q8. How many sprays recommended? <span class="req">*</span></label>
+            <label class="fl">Q9. How many sprays of Excalia Max® did you recommend? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q14_sprays" value="One Spray"> <label>a. One Spray</label></label>
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q14_sprays" value="Two Sprays"><label>b. Two Sprays</label></label>
@@ -640,7 +667,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           <div class="sh">Section C — Recommendation Details</div>
 
           <div class="fg">
-            <label class="fl">Q9. Dose recommended <span class="req">*</span></label>
+            <label class="fl">Q10. At what dose did you recommend Excalia Max® ? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q15_dose" value="200 ml per acre">       <label>a. 200 ml per acre</label></label>
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q15_dose" value="250 ml per acre">       <label>b. 250 ml per acre</label></label>
@@ -649,7 +676,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q10. Water volume per acre <span class="req">*</span></label>
+            <label class="fl">Q11. How much water volume is applied per acre by farmer for fungicides? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this);hideCond('dWatOth')"><input type="radio" name="q16_water_volume" value="100 lit">   <label>a. 100 lit</label></label>
               <label class="ri" onclick="pickR(this);hideCond('dWatOth')"><input type="radio" name="q16_water_volume" value="150 lit">   <label>b. 150 lit</label></label>
@@ -659,14 +686,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q11. Tank mix recommended (if any)</label>
+            <label class="fl">Q12. Any tank mix partner recommended with Excalia Max® ?</label>
             <textarea class="fta" name="q17_tank_mix" placeholder="a. ___________&#10;b. ___________"></textarea>
           </div>
 
           <div class="sh">Section D — Overall Feedback</div>
 
           <div class="fg">
-            <label class="fl">Q12. Satisfaction level (1–10) <span class="req">*</span></label>
+            <label class="fl">Q13. What is your satisfaction level for Excalia Max® results? (1–10) <span class="req">*</span></label>
             <div class="rscale" id="dRat">
               <button class="rbtn" type="button" onclick="setRat('dRat','q18_satisfaction',1)">1</button>
               <button class="rbtn" type="button" onclick="setRat('dRat','q18_satisfaction',2)">2</button>
@@ -684,7 +711,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q13. Major factor to increase sales <span class="req">*</span></label>
+            <label class="fl">Q14. What one major factor shall help you increase Excalia Max® sales? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q20_sales_factor" value="Profit Margins">  <label>a. Profit Margins</label></label>
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q20_sales_factor" value="Product Demand">  <label>b. Product Demand</label></label>
@@ -694,7 +721,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q14. Quality of information shared (1–5) <span class="req">*</span></label>
+            <label class="fl">Q15. What was the quality of Excalia Max® information shared to you? (1–5) <span class="req">*</span></label>
             <div class="rscale" id="dRat2">
               <button class="rbtn" type="button" onclick="setRat('dRat2','q21_info_quality',1)">1</button>
               <button class="rbtn" type="button" onclick="setRat('dRat2','q21_info_quality',2)">2</button>
@@ -707,7 +734,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
 
           <div class="fg">
-            <label class="fl">Q15. Will you sell Excalia Max® next year? <span class="req">*</span></label>
+            <label class="fl">Q16. Will you sell Excalia Max® next year? <span class="req">*</span></label>
             <div class="rg">
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q22_sell_next_year" value="Yes"><label>a. Yes</label></label>
               <label class="ri" onclick="pickR(this)"><input type="radio" name="q22_sell_next_year" value="No"> <label>b. No</label></label>
@@ -989,6 +1016,8 @@ function setType(t){
   Q('s3h').textContent  =t==='farmer'?'Find Farmer by Mobile':'Find Dealer by Mobile';
   Q('nrLbl').textContent=t==='farmer'?'Farmer':'Dealer';
   Q('s4h').textContent  =t==='farmer'?'Farmer Survey Questions':'Dealer Survey Questions';
+  Q('FQ').classList.toggle('hidden', t==='dealer');
+  Q('DQ').classList.toggle('hidden', t==='farmer');
   rebuildDDs();
 }
 
@@ -1036,14 +1065,34 @@ const uniq=a=>[...new Set(a.filter(Boolean))].sort();
 function aDS(){return stype==='dealer'?dDS:fDS;}
 function rebuildDDs(){
   const ds=aDS();
-  fill('selState', uniq(ds.map(r=>r.state)),    '-- Select State --');
-  fill('selRegion',uniq(ds.map(r=>r.region)),   '-- Select Region --');
-  fill('selTerr',  uniq(ds.map(r=>r.territory)),'-- Select Territory --');
+  fill('selState', uniq(ds.map(r=>r.state)),'-- Select State --');
+  fill('selRegion',[],'-- Select Region --');
+  fill('selTerr',  [],'-- Select Territory --');
+  Q('terrInfo').style.display='none';
   const note=Q('dsNote');
   if(note) note.textContent=`${ds.length} ${stype==='dealer'?'dealer':'farmer'} records loaded`;
 }
 function fill(id,items,ph){
   Q(id).innerHTML=`<option value="">${ph}</option>`+items.map(x=>`<option>${x}</option>`).join('');
+}
+function onState(){
+  const st=V('selState');
+  const ds=aDS();
+  const filtered=ds.filter(r=>r.state===st);
+  fill('selRegion',uniq(filtered.map(r=>r.region)),'-- Select Region --');
+  fill('selTerr',[],'-- Select Territory --');
+  Q('terrInfo').style.display='none';
+  selRec=null;isNew=false;
+  resetMobSearch();
+}
+function onRegion(){
+  const st=V('selState'),rg=V('selRegion');
+  const ds=aDS();
+  const filtered=ds.filter(r=>r.state===st&&r.region===rg);
+  fill('selTerr',uniq(filtered.map(r=>r.territory)),'-- Select Territory --');
+  Q('terrInfo').style.display='none';
+  selRec=null;isNew=false;
+  resetMobSearch();
 }
 function onTerr(){
   const t=V('selTerr'); const ti=Q('terrInfo');
@@ -1052,6 +1101,9 @@ function onTerr(){
   ti.textContent=`ℹ️ ${pool.length} records in this territory`;
   ti.style.display='block';
   selRec=null;isNew=false;
+  resetMobSearch();
+}
+function resetMobSearch(){
   Q('mobIn').value='';
   Q('mobHint').textContent='Enter 10 digits to search';
   Q('mobHint').style.color='var(--g4)';
@@ -1148,7 +1200,6 @@ function pickR(el){
 function pickC(el){
   const inp=el.querySelector('input');
   const isNone=inp.value.includes('None of the Above');
-  // toggle first
   const willCheck=!inp.checked;
   if(willCheck){
     if(isNone){
@@ -1157,6 +1208,24 @@ function pickC(el){
       });
     } else {
       document.querySelectorAll('#benefitsCG input[type=checkbox]').forEach(cb=>{
+        if(cb.value.includes('None of the Above')){cb.checked=false;cb.closest('.ci').classList.remove('on');}
+      });
+    }
+  }
+  inp.checked=willCheck;
+  el.classList.toggle('on',willCheck);
+}
+function pickC2(el){
+  const inp=el.querySelector('input');
+  const isNone=inp.value.includes('None of the Above');
+  const willCheck=!inp.checked;
+  if(willCheck){
+    if(isNone){
+      document.querySelectorAll('#dBenefitsCG input[type=checkbox]').forEach(cb=>{
+        if(cb!==inp){cb.checked=false;cb.closest('.ci').classList.remove('on');}
+      });
+    } else {
+      document.querySelectorAll('#dBenefitsCG input[type=checkbox]').forEach(cb=>{
         if(cb.value.includes('None of the Above')){cb.checked=false;cb.closest('.ci').classList.remove('on');}
       });
     }
@@ -1228,7 +1297,11 @@ async function postWH(data){
 function reset(){
   stype=null;selRec=null;isNew=false;
   ['tcF','tcD'].forEach(id=>Q(id).classList.remove('on'));
-  ['selState','selRegion','selTerr'].forEach(id=>Q(id).value='');
+  Q('FQ').classList.remove('hidden');
+  Q('DQ').classList.add('hidden');
+  Q('selState').value='';
+  fill('selRegion',[],'-- Select Region --');
+  fill('selTerr',  [],'-- Select Territory --');
   Q('mobIn').value='';
   Q('mobHint').textContent='Enter 10 digits to search';
   Q('mobHint').style.color='var(--g4)';
