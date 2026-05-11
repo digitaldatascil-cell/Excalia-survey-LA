@@ -563,6 +563,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--g1);color:var(
           </div>
         </div>
 
+        <!--
+          Q1b — Total Qty Sold in Litres
+          Placed OUTSIDE #dRest so it is NOT greyed-out by skip-block.
+          Shown/hidden by onSold() separately. Hidden by default.
+        -->
+        <div class="fg hidden" id="dQtyBlock">
+          <label class="fl">Q1b. Total quantity of Excalia Max® sold this season (Litres) <span class="req">*</span></label>
+          <input type="number" class="fi" name="q7_qty_sold_litres" id="dQtyInp"
+            placeholder="Enter total litres sold e.g. 25"
+            min="0" step="0.5" inputmode="decimal">
+        </div>
+
         <div id="dRest">
           <div class="fg">
             <label class="fl">Q2. On what crop was Excalia Max® recommended? <span class="req">*</span></label>
@@ -1168,7 +1180,13 @@ function confirmNew(){
    Q1 YES/NO — skip if No
 ════════════════════════════════════ */
 function onApplied(v){Q('fRest').classList.toggle('skip-block',v==='No');}
-function onSold(v)   {Q('dRest').classList.toggle('skip-block',v==='No');}
+function onSold(v){
+  const isNo=v==='No';
+  Q('dRest').classList.toggle('skip-block',isNo);
+  // Q1b — show qty input only when Yes; clear value when switching to No
+  Q('dQtyBlock').classList.toggle('hidden',isNo);
+  if(isNo){Q('dQtyInp').value='';}
+}
 
 /* ════════════════════════════════════
    CROP STAGES
@@ -1313,6 +1331,8 @@ function reset(){
   document.querySelectorAll('[name]').forEach(el=>{if(el.type!=='radio'&&el.type!=='checkbox')el.value='';});
   document.querySelectorAll('.skip-block').forEach(el=>el.classList.remove('skip-block'));
   Q('terrInfo').style.display='none';
+  // Reset Q1b qty block to hidden default
+  Q('dQtyBlock').classList.add('hidden');
   // Keep submitter details so field officer doesn't re-enter each survey
   step=1; showStep(1);
 }
